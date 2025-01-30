@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Serverless To-Do App</title>
+</head>
+<body>
+    <h2>To-Do List</h2>
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <button onclick="addTask()">Add Task</button>
+    <ul id="taskList"></ul>
+
+    <script>
+        const API_URL = "arn:aws:apigateway:ap-south-1::/apis/9g4apjrx5a/routes/jpkbn7t"; 
+
+        function addTask() {
+            let taskName = document.getElementById("taskInput").value;
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ taskName }),
+                headers: { "Content-Type": "application/json" }
+            }).then(response => response.json())
+              .then(data => loadTasks());
+        }
+
+        function loadTasks() {
+            fetch(API_URL).then(response => response.json())
+                          .then(tasks => {
+                document.getElementById("taskList").innerHTML = tasks.map(task => 
+                    `<li>${task.taskName} <button onclick="deleteTask('${task.taskId}')">Delete</button></li>`
+                ).join('');
+            });
+        }
+
+        function deleteTask(taskId) {
+            fetch(API_URL, {
+                method: "DELETE",
+                body: JSON.stringify({ taskId }),
+                headers: { "Content-Type": "application/json" }
+            }).then(response => response.json())
+              .then(() => loadTasks());
+        }
+
+        loadTasks();
+    </script>
+</body>
+</html>
